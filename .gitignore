@@ -1,0 +1,6 @@
+#environment variables (folder paths and token)
+.env
+
+#audio folder / ffmpeg and files
+Audio/
+ffmpeg/
