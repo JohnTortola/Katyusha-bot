@@ -1,5 +1,6 @@
 #environment variables (folder paths and token)
 .env
+runKatyusha.bat
 
 #audio folder / ffmpeg and files
 Audio/
