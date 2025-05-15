@@ -5,3 +5,4 @@ runKatyusha.bat
 #audio folder / ffmpeg and files
 Audio/
 ffmpeg/
+__pycache__/

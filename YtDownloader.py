@@ -1,25 +1,15 @@
 import yt_dlp
 import os
 import re
-from dotenv import load_dotenv
 
-    # Remove characters that are not safe in filenames
+# Remove characters that are not safe in filenames
 def sanitize_filename(filename):
     return re.sub(r'[^\w\s.-]', '', filename)
 
-#load folder paths from .env // paths for the audio conversion must be the folder where the exe files of ffmpeg and ffprobe are
-load_dotenv()
-audio_env_path = os.getenv("AUDIO_PATH")
-ffmpeg_env_path = os.getenv("FFMPEG_PATH")
-ffprobe_env_path = os.getenv("FFPROBE_PATH")
-
-def download_audio(url, output_path=audio_env_path):
+def download_audio(url, output_path, ffmpeg_path, ffprobe_path):
 
     if not os.path.exists(output_path):
         os.makedirs(output_path)
-
-    ffmpeg_path = ffmpeg_env_path
-    ffprobe_path = ffprobe_env_path
 
     try:
         # Extract info without downloading and sanitize
@@ -27,6 +17,11 @@ def download_audio(url, output_path=audio_env_path):
             info = ydl_temp.extract_info(url, download=False)
             unsanitized_title = info.get("title", "untitled_audio")
             title = sanitize_filename(unsanitized_title)
+
+            duration_seconds = info.get("duration", 0)
+            if duration_seconds > 600: #10 minutes
+                print("Video is too long.")
+                return False, "Video duration exceeds limit", title
             
         filename = os.path.join(output_path, f"{title}.mp3")
         print(f"\n{filename}")
@@ -49,6 +44,7 @@ def download_audio(url, output_path=audio_env_path):
             'noplaylist': True,
             'postprocessor_args': ['-filter:a', 'volume=0.07']
         }
+
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
