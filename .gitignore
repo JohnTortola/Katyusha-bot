@@ -1,8 +1,11 @@
 #environment variables (folder paths and token)
 .env
 runKatyusha.bat
+stuff.txt
 
 #audio folder / ffmpeg and files
 Audio/
 ffmpeg/
 __pycache__/
+.venv/
+Context/

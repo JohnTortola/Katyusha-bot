@@ -6,21 +6,21 @@ from collections import defaultdict
 import asyncio
 from YtDownloader import download_audio
 from AudioCleaner import clean_audios
-
-
+from ChatBot import talk
 
 intents = discord.Intents.default()
 intents.message_content = True
 
 #settings for the prefix
-katyusha = commands.Bot(command_prefix='!kt ', intents=intents)
+katyusha = commands.Bot(command_prefix='!k ', intents=intents)
 
 #load the .env file with the discord bot token
 load_dotenv()
 token = os.getenv("DISCORD_BOT_TOKEN")
 audio_env_path = os.getenv("AUDIO_PATH")
-ffmpeg_env_path = os.getenv("FFMPEG_PATH")
+ffmpeg_env_path = os.getenv("FFMPEG_PATH") #both ffmpeg and ffprobe are exe paths
 ffprobe_env_path = os.getenv("FFPROBE_PATH")
+context_env_path = os.getenv("CONTEXT_PATH")
 bot_loop = katyusha.loop
 queues = defaultdict(list)
 
@@ -30,13 +30,20 @@ queues = defaultdict(list)
 @katyusha.event
 async def on_ready():
     print(f'Katyusha is loaded. Logged in as {katyusha.user}');
+    if audio_env_path is None:
+        raise ValueError("AUDIO_PATH enviroment variable is missing")
+    os.makedirs(audio_env_path, exist_ok=True)
+
+    if context_env_path is None:
+        raise ValueError("CONTEXT_PATH enviroment variable is missing")
+    os.makedirs(context_env_path, exist_ok=True)
 
 
 
 #simple hello command
 @katyusha.command()
-async def hello(ctx):
-    await ctx.send("Panzer vooooor!!")
+async def ping(ctx):
+    await ctx.send("pong")
 
 
 
@@ -135,5 +142,16 @@ async def leave(ctx):
 
 
 
+@katyusha.command()
+async def m(ctx,*,message:str):
+    server_id = ctx.guild.id if ctx.guild else "DM"
+    username = ctx.author.display_name
+    response = await talk(server_id=server_id, username=username, message=message, CONTEXT_PATH=context_env_path)
+    await ctx.send(response)
+
+
+
 print(token)
+if token is None:
+    raise ValueError("DISCORD_BOT_TOKEN enviroment variable is missing")
 katyusha.run(token)
